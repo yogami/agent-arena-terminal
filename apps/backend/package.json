@@ -1,21 +1,24 @@
 {
   "name": "@agent-arena/backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Agent Arena Terminal backend — A2A telemetry and x402 monetization API",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "jest",
-    "start": "node server.js"
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2"
+  },
   "devDependencies": {
+    "eslint": "^8.57.0",
     "jest": "^30.4.2",
     "supertest": "^7.2.2"
-  },
-  "dependencies": {
-    "express-rate-limit": "^8.5.2"
   }
 }

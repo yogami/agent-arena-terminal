@@ -4,6 +4,11 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 app.use(express.json());
 
+// Health check for CI/CD smoke tests and Railway health probes
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // In-memory store for TDD MVP
 const leaderboard = new Map();
 
@@ -13,9 +18,9 @@ const apiLimiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per `window`
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: true, // Enables the X-RateLimit-* headers required by our OpenAPI contract
-  handler: (req, res, next, options) => {
+  handler: (_req, res, _next, _options) => {
     res.status(429).json({ error: 'Too Many Requests' });
-  }
+  },
 });
 
 app.use('/a2a/', apiLimiter);
@@ -34,7 +39,11 @@ app.post('/a2a/SendMessage', (req, res) => {
 
   // Upsert agent to leaderboard
   if (!leaderboard.has(sourceAgentId)) {
-    leaderboard.set(sourceAgentId, { id: sourceAgentId, volume: 0, hasVeraBadge: signature === 'valid_signature' });
+    leaderboard.set(sourceAgentId, {
+      id: sourceAgentId,
+      volume: 0,
+      hasVeraBadge: signature === 'valid_signature',
+    });
   }
 
   res.status(202).json({ success: true });
@@ -53,10 +62,10 @@ app.post('/api/boost', (req, res) => {
   }
 
   if (signature === 'valid_eip3009_sig') {
-    let agent = leaderboard.get(agentId) || { id: agentId, volume: 0, hasVeraBadge: false };
+    const agent = leaderboard.get(agentId) || { id: agentId, volume: 0, hasVeraBadge: false };
     agent.volume += amountUsdc;
     leaderboard.set(agentId, agent);
-    
+
     return res.status(200).json({ success: true, newVolume: agent.volume });
   }
 

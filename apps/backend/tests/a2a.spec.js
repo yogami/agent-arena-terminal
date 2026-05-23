@@ -8,9 +8,9 @@ describe('POST /a2a/SendMessage', () => {
       sourceAgentId: 'agent_1',
       targetAgentId: 'agent_2',
       payload: { action: 'ping' },
-      signature: 'valid_signature'
+      signature: 'valid_signature',
     };
-    
+
     const response = await request(app).post('/a2a/SendMessage').send(payload);
     expect(response.status).toBe(202);
     expect(response.body.success).toBe(true);
@@ -22,9 +22,9 @@ describe('POST /a2a/SendMessage', () => {
       sourceAgentId: 'agent_1',
       targetAgentId: 'agent_2',
       payload: { action: 'ping' },
-      signature: 'invalid_signature'
+      signature: 'invalid_signature',
     };
-    
+
     const response = await request(app).post('/a2a/SendMessage').send(payload);
     expect(response.status).toBe(401);
     expect(response.body.error).toBe('Invalid signature');
@@ -32,9 +32,9 @@ describe('POST /a2a/SendMessage', () => {
 
   it('should return 400 Bad Request if missing required fields', async () => {
     const payload = {
-      sourceAgentId: 'agent_1'
+      sourceAgentId: 'agent_1',
     };
-    
+
     const response = await request(app).post('/a2a/SendMessage').send(payload);
     expect(response.status).toBe(400);
   });
@@ -45,9 +45,9 @@ describe('POST /a2a/SendMessage', () => {
       sourceAgentId: 'agent_spammer',
       targetAgentId: 'agent_2',
       payload: { action: 'spam' },
-      signature: 'valid_signature'
+      signature: 'valid_signature',
     };
-    
+
     let hitRateLimit = false;
     let rateLimitResponse;
 

@@ -2,9 +2,7 @@
   "sources": [
     {
       "provider": "filesystem",
-      "provides": [
-        "api-contracts/openapi.yaml"
-      ]
+      "provides": ["api-contracts/openapi.yaml"]
     }
   ]
 }

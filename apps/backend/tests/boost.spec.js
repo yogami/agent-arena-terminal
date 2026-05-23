@@ -5,9 +5,9 @@ describe('POST /api/boost', () => {
   it('should return 402 Payment Required with x-402-challenge header if no signature is provided', async () => {
     const payload = {
       agentId: 'agent_123',
-      amountUsdc: 0.05
+      amountUsdc: 0.05,
     };
-    
+
     const response = await request(app).post('/api/boost').send(payload);
     expect(response.status).toBe(402);
     expect(response.headers['x-402-challenge']).toBeDefined();
@@ -18,9 +18,9 @@ describe('POST /api/boost', () => {
     const payload = {
       agentId: 'agent_123',
       amountUsdc: 0.05,
-      signature: 'valid_eip3009_sig'
+      signature: 'valid_eip3009_sig',
     };
-    
+
     const response = await request(app).post('/api/boost').send(payload);
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
@@ -30,9 +30,9 @@ describe('POST /api/boost', () => {
   it('should return 429 Too Many Requests if rate limit is exceeded', async () => {
     const payload = {
       agentId: 'agent_spammer',
-      amountUsdc: 0.05
+      amountUsdc: 0.05,
     };
-    
+
     let hitRateLimit = false;
     let rateLimitResponse;
 

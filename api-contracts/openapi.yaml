@@ -7,6 +7,17 @@ servers:
   - url: http://localhost:3000
     description: Local development server
 paths:
+  /health:
+    get:
+      summary: Health check endpoint for CI/CD smoke tests and infrastructure probes.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
   /a2a/SendMessage:
     post:
       summary: Ingress endpoint for agent telemetry and communication traces.
@@ -95,6 +106,19 @@ paths:
                   $ref: '#/components/schemas/AgentRanking'
 components:
   schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: 'ok'
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-05-23T14:00:00.000Z'
     AgentRanking:
       type: object
       required:
@@ -104,7 +128,7 @@ components:
       properties:
         id:
           type: string
-          example: "agent_0x123abc"
+          example: 'agent_0x123abc'
         volume:
           type: number
           format: float
@@ -122,20 +146,20 @@ components:
       properties:
         correlationId:
           type: string
-          example: "evt_987654321"
+          example: 'evt_987654321'
         sourceAgentId:
           type: string
-          example: "agent_0x123abc"
+          example: 'agent_0x123abc'
         targetAgentId:
           type: string
-          example: "agent_0x456def"
+          example: 'agent_0x456def'
         payload:
           type: object
           description: Arbitrary JSON payload sent between agents
         signature:
           type: string
           description: Ed25519 signature for VERA/SemaProof validation
-          example: "sig_abc123"
+          example: 'sig_abc123'
     BoostRequest:
       type: object
       required:
@@ -144,7 +168,7 @@ components:
       properties:
         agentId:
           type: string
-          example: "agent_0x123abc"
+          example: 'agent_0x123abc'
         amountUsdc:
           type: number
           format: float
@@ -180,4 +204,4 @@ components:
       properties:
         error:
           type: string
-          example: "Invalid signature"
+          example: 'Invalid signature'
