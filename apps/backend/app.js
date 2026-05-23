@@ -1,6 +1,5 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const crypto = require('crypto');
 
 const app = express();
 const helmet = require('helmet');
