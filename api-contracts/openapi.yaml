@@ -104,6 +104,97 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AgentRanking'
+  /api/traps:
+    post:
+      summary: Deploy a new honeytoken trap for EU AI Act compliance monitoring.
+      operationId: createTrap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrapRequest'
+      responses:
+        '201':
+          description: Trap deployed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrapResponse'
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+    get:
+      summary: List all deployed honeytoken traps.
+      operationId: listTraps
+      responses:
+        '200':
+          description: Array of all deployed traps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrapSummary'
+  /api/traps/{trapId}/trigger:
+    post:
+      summary: Report that a honeytoken trap was accessed by an agent.
+      operationId: triggerTrap
+      parameters:
+        - name: trapId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerRequest'
+      responses:
+        '200':
+          description: Violation recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - violation
+                properties:
+                  violation:
+                    $ref: '#/components/schemas/Violation'
+        '404':
+          description: Trap not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/traps/violations:
+    get:
+      summary: List all compliance violation events.
+      operationId: listViolations
+      responses:
+        '200':
+          description: Array of all violation events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Violation'
 components:
   schemas:
     HealthResponse:
@@ -205,3 +296,116 @@ components:
         error:
           type: string
           example: 'Invalid signature'
+    TrapRequest:
+      type: object
+      required:
+        - trapType
+        - description
+      properties:
+        trapType:
+          type: string
+          enum:
+            - api_key
+            - pii
+            - document
+          example: 'api_key'
+        description:
+          type: string
+          example: 'Decoy AWS access key in config repo'
+        metadata:
+          type: object
+          description: Optional metadata for the trap
+    TrapResponse:
+      type: object
+      required:
+        - trapId
+        - token
+        - createdAt
+      properties:
+        trapId:
+          type: string
+          example: 'trap_abc123'
+        token:
+          type: string
+          example: 'AKIA_DECOY_0x1234567890abcdef'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-23T14:00:00.000Z'
+    TrapSummary:
+      type: object
+      required:
+        - trapId
+        - trapType
+        - description
+        - status
+        - createdAt
+      properties:
+        trapId:
+          type: string
+          example: 'trap_abc123'
+        trapType:
+          type: string
+          enum:
+            - api_key
+            - pii
+            - document
+        description:
+          type: string
+          example: 'Decoy AWS access key in config repo'
+        status:
+          type: string
+          enum:
+            - active
+            - triggered
+        createdAt:
+          type: string
+          format: date-time
+        triggeredAt:
+          type: string
+          format: date-time
+        triggeredBy:
+          type: string
+    TriggerRequest:
+      type: object
+      required:
+        - agentId
+        - accessContext
+      properties:
+        agentId:
+          type: string
+          example: 'rogue_agent_0x666'
+        accessContext:
+          type: string
+          example: 'Attempted to use decoy API key in production request'
+        timestamp:
+          type: string
+          format: date-time
+    Violation:
+      type: object
+      required:
+        - trapId
+        - agentId
+        - accessContext
+        - timestamp
+        - severityLevel
+      properties:
+        trapId:
+          type: string
+          example: 'trap_abc123'
+        agentId:
+          type: string
+          example: 'rogue_agent_0x666'
+        accessContext:
+          type: string
+          example: 'Attempted to use decoy API key in production request'
+        timestamp:
+          type: string
+          format: date-time
+        severityLevel:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+            - critical
