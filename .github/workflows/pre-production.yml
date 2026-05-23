@@ -1,0 +1,50 @@
+name: Pre-Production Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Security Audit
+        run: npm audit --audit-level=high
+      - name: Lint Code
+        run: npm run lint
+      - name: Check Formatting
+        run: npx prettier --check .
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Setup Java (for Specmatic)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Install dependencies
+        run: npm ci
+      - name: Download Specmatic
+        run: curl -L https://github.com/znsio/specmatic/releases/download/1.3.26/specmatic.jar -o specmatic.jar
+      - name: Start Backend Server
+        run: npm run start --workspace=apps/backend &
+      - name: Wait for Server
+        run: sleep 5
+      - name: Run Specmatic Contract Tests
+        run: java -jar specmatic.jar test --host=localhost --port=3000

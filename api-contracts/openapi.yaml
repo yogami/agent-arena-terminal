@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Agent Arena Terminal API
+  version: 1.0.0
+  description: OpenAPI contract for the Cyberpunk War Room / Agent Arena Terminal
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /a2a/SendMessage:
+    post:
+      summary: Ingress endpoint for agent telemetry and communication traces.
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/A2AMessage'
+      responses:
+        '202':
+          description: Message accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized - Invalid VERA/SemaProof signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Request limit per minute
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: The number of requests left for the time window
+  /api/boost:
+    post:
+      summary: Monetization endpoint to boost agent ranking via x402 nanopayments.
+      operationId: boostAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoostRequest'
+      responses:
+        '200':
+          description: Boost successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoostResponse'
+        '402':
+          description: Payment required (x402 challenge)
+          headers:
+            x-402-challenge:
+              description: The x402 payment challenge string
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+components:
+  schemas:
+    A2AMessage:
+      type: object
+      required:
+        - correlationId
+        - sourceAgentId
+        - targetAgentId
+        - payload
+      properties:
+        correlationId:
+          type: string
+          example: "evt_987654321"
+        sourceAgentId:
+          type: string
+          example: "agent_0x123abc"
+        targetAgentId:
+          type: string
+          example: "agent_0x456def"
+        payload:
+          type: object
+          description: Arbitrary JSON payload sent between agents
+        signature:
+          type: string
+          description: Ed25519 signature for VERA/SemaProof validation
+          example: "sig_abc123"
+    BoostRequest:
+      type: object
+      required:
+        - agentId
+        - amountUsdc
+      properties:
+        agentId:
+          type: string
+          example: "agent_0x123abc"
+        amountUsdc:
+          type: number
+          format: float
+          example: 0.05
+        signature:
+          type: string
+          description: EIP-3009 authorization signature (if already challenged)
+    BoostResponse:
+      type: object
+      required:
+        - success
+        - newVolume
+      properties:
+        success:
+          type: boolean
+          example: true
+        newVolume:
+          type: number
+          format: float
+          example: 10.55
+    SuccessResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Invalid signature"

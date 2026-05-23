@@ -1,0 +1,70 @@
+asyncapi: 2.6.0
+info:
+  title: Agent Arena Real-Time Emitter
+  version: 1.0.0
+  description: WebSocket events pushed to the Next.js frontend
+servers:
+  dev:
+    url: ws://localhost:3000/ws
+    protocol: ws
+    security:
+      - tokenAuth: []
+components:
+  securitySchemes:
+    tokenAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token passed in connection initialization or subprotocol
+  messages:
+    TelemetryEvent:
+      name: telemetry
+      title: Agent Telemetry Event
+      payload:
+        type: object
+        required:
+          - type
+          - data
+        properties:
+          type:
+            type: string
+            enum: [TELEMETRY]
+          data:
+            type: object
+            properties:
+              correlationId:
+                type: string
+              sourceAgentId:
+                type: string
+              targetAgentId:
+                type: string
+              hasVeraBadge:
+                type: boolean
+    BoostEvent:
+      name: boost
+      title: Agent Boost Event
+      payload:
+        type: object
+        required:
+          - type
+          - data
+        properties:
+          type:
+            type: string
+            enum: [BOOST]
+          data:
+            type: object
+            properties:
+              agentId:
+                type: string
+              amountUsdc:
+                type: number
+              newVolume:
+                type: number
+channels:
+  /:
+    subscribe:
+      summary: Subscribe to real-time arena events
+      message:
+        oneOf:
+          - $ref: '#/components/messages/TelemetryEvent'
+          - $ref: '#/components/messages/BoostEvent'

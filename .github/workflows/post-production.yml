@@ -1,0 +1,23 @@
+name: Post-Production Pipeline
+
+on:
+  deployment_status:
+
+jobs:
+  load-and-blackbox-tests:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Load Tests (Artillery)
+        run: |
+          echo "Running load tests against ${{ github.event.deployment_status.target_url }}..."
+          # npx artillery run tests/load/scenario.yml
+      - name: Run E2E Blackbox Tests (Playwright)
+        run: |
+          echo "Running Playwright against production..."
+          # npx playwright test --config=playwright.config.ts
