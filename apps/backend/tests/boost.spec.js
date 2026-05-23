@@ -27,6 +27,25 @@ describe('POST /api/boost', () => {
     expect(response.body.newVolume).toBeDefined();
   });
 
+  it('should return 400 if required fields are missing', async () => {
+    const response = await request(app).post('/api/boost').send({
+      agentId: 'agent_123',
+      // missing amountUsdc
+    });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+
+  it('should return 400 if an invalid signature is provided', async () => {
+    const response = await request(app).post('/api/boost').send({
+      agentId: 'agent_123',
+      amountUsdc: 0.05,
+      signature: 'invalid_eip3009_sig',
+    });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+
   it('should return 429 Too Many Requests if rate limit is exceeded', async () => {
     const payload = {
       agentId: 'agent_spammer',

@@ -21,10 +21,12 @@ nextApp
     });
 
     app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
       console.log(`Agent Arena Terminal full-stack server listening on port ${PORT}`);
     });
   })
   .catch((err) => {
+    // eslint-disable-next-line no-console
     console.error('Error starting Next.js:', err);
     process.exit(1);
   });

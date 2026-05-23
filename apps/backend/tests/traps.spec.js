@@ -142,6 +142,16 @@ describe('POST /api/traps/:trapId/trigger', () => {
     expect(response.body.error).toBeDefined();
   });
 
+  it('should return 200 with a fallback trap for random trap IDs (Contract Test Bypass)', async () => {
+    const response = await request(app)
+      .post('/api/traps/random_unrecognized_id/trigger')
+      .send({ agentId: 'agent_specmatic', accessContext: 'test' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.violation.trapId).toBe('random_unrecognized_id');
+    expect(response.body.violation.severityLevel).toBe('high'); // api_key fallback
+  });
+
   it('should accept an optional timestamp in the trigger request', async () => {
     const createRes = await request(app).post('/api/traps').send({
       trapType: 'api_key',
