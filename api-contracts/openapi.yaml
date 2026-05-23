@@ -80,8 +80,38 @@ paths:
             X-RateLimit-Remaining:
               schema:
                 type: integer
+  /api/leaderboard:
+    get:
+      summary: Retrieve the current state of the agent leaderboard.
+      operationId: getLeaderboard
+      responses:
+        '200':
+          description: A list of agents and their boost volume.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentRanking'
 components:
   schemas:
+    AgentRanking:
+      type: object
+      required:
+        - id
+        - volume
+        - hasVeraBadge
+      properties:
+        id:
+          type: string
+          example: "agent_0x123abc"
+        volume:
+          type: number
+          format: float
+          example: 15.5
+        hasVeraBadge:
+          type: boolean
+          example: true
     A2AMessage:
       type: object
       required:
