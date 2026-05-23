@@ -10,7 +10,9 @@
     "format": "npm run format --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:contract": "specmatic test",
-    "prepare": "husky"
+    "build": "npm run build --workspace=apps/frontend",
+    "start": "npm run start --workspace=apps/backend",
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
